@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Clients;
 use Illuminate\Http\Request;
 use DB;
 use DataTables;
@@ -13,119 +12,58 @@ class ClientController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    // public function index()
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Show the form for creating a new resource.
-    //  *
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function create()
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Store a newly created resource in storage.
-    //  *
-    //  * @param  \Illuminate\Http\Request  $request
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function store(Request $request)
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Display the specified resource.
-    //  *
-    //  * @param  int  $id
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function show($id)
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Show the form for editing the specified resource.
-    //  *
-    //  * @param  int  $id
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function edit($id)
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Update the specified resource in storage.
-    //  *
-    //  * @param  \Illuminate\Http\Request  $request
-    //  * @param  int  $id
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function update(Request $request, $id)
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Remove the specified resource from storage.
-    //  *
-    //  * @param  int  $id
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function destroy($id)
-    // {
-    //     //
-    // }
-
-
-
-    //Controller start
     public function index(Request $request)
     {
-    if ($request->ajax()) {
-    $data = Clients::latest()->get();
-    return Datatables::of($data)
-    ->addIndexColumn()
-    ->addColumn('action', function($row){
-    
-    $action = '<a class="btn btn-info" id="show-user" data-toggle="modal" data-id='.$row->Serial_No.'>Show</a>
-    <a class="btn btn-success" id="edit-user" data-toggle="modal" data-id='.$row->Serial_No.'>Edit </a>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <a id="delete-user" data-id='.$row->Serial_No.' class="btn btn-danger delete-user">Delete</a>';
-    
-    return $action;
-    
-    })
-    ->rawColumns(['action'])
-    ->make(true);
-    }
-    
-    return view('users');
+        if ($request->ajax()) {
+        // $data = Clients::latest()->get();
+            $data = DB::table('clients')->orderBy('Serial_No', 'DESC')->get();
+            return Datatables::of($data)
+            ->addIndexColumn()
+            ->addColumn('action', function($row){
+                $action = '<a class="btn btn-info" id="show-user" data-toggle="modal" data-id='.$row->Serial_No.'>Show</a>
+                <a class="btn btn-success" id="edit-user" data-toggle="modal" data-id='.$row->Serial_No.'>Edit </a>
+                <meta name="csrf-token" content="{{ csrf_token() }}">
+                <a id="delete-user" data-id='.$row->Serial_No.' class="btn btn-danger delete-user">Delete</a>';
+                return $action;
+            })
+            ->rawColumns(['action'])
+            ->make(true);
+        }
+        return view('Clients');
     }
     
     public function store(Request $request)
     {
-    
-    $r=$request->validate([
-    'name' => 'required',
-    'email' => 'required',
-    
-    ]);
+        $msg = 'Data insertion error!';
+        $validateData =$request->validate([
+            'CompanyName' => 'required|max:255',
+            'CompanyAddress' => 'max:255',
+            'ContactPerson' => 'max:100',
+            'Designation' => 'max:255',
+            'MobileNo' => 'max:255',
+            'EmailAddress' => 'max:255',
+            'ITManager' => 'max:255',
+            'ContactNo' => 'max:255',
+            'EmailAddress_IT' => 'max:255',
+            'Status' => 'max:25',
+        ]);
+        $data=array();
+        $data['CompanyName']=$request->CompanyName;
+        $data['CompanyAddress']=$request->CompanyAddress;
+        $data['ContactPerson']=$request->ContactPerson;
+        $data['Designation']=$request->Designation;
+        $data['MobileNo']=$request->MobileNo;
+        $data['EmailAddress']=$request->EmailAddress;
+        $data['ITManager']=$request->ITManager;
+        $data['ContactNo']=$request->ContactNo;
+        $data['EmailAddress_IT']=$request->EmailAddress_IT;
+        $post=DB::table('clients')->insert($data);
+        if($post)
+        {
+            $msg = 'Inserted successfully.';
+        }
+        return Response::json($post);
 
-    $uId = $request->user_id;
-    Clients::updateOrCreate(['id' => $uId],['name' => $request->name, 'email' => $request->email]);
-    if(empty($request->user_id))
-    $msg = 'Clients created successfully.';
-    else
-    $msg = 'Clients data is updated successfully';
-    return redirect()->route('users.index')->with('success',$msg);
     }
     
     /**
@@ -166,8 +104,8 @@ class ClientController extends Controller
     
     public function destroy($id)
     {
-    $user = Clients::where('Serial_No',$id)->delete();
-    return Response::json($user);
+        $user = DB::table('clients')->where('Serial_No',$id)->delete();
+        return Response::json($user);
     //return redirect()->route('users.index');
     }
     //Controller end

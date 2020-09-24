@@ -14,13 +14,14 @@ use App\Http\Controllers\ClientController;
 |
 */
 
+Route::resource('clients', ClientController::class);
 Route::get('/', function () {
     return view('home');
 });
-Route::get('/clients', [ClientController::class, 'index']);
-Auth::routes();
+// Route::get('/clients', [ClientController::class, 'index']);
+// Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+// Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Auth::routes();
 
